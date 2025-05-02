@@ -62,4 +62,22 @@ class User extends Authenticatable
         return User::where('email', $email)
             ->first();
     }
+
+    /**
+     * | Get User by Id
+     */
+    public function getUserDetails($id)
+    {
+        return User::where('id', $id)
+            ->first();
+    }
+
+    /**
+     * | Edit User Details
+     */
+    public function editUser($req)
+    {
+        $mUser = User::findorfail($req['id']);
+        $mUser->update($req);
+    }
 }

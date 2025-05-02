@@ -30,15 +30,9 @@ if (!function_exists("validationError")) {
  * | Auth user
  */
 if (!function_exists('authUser')) {
-    function authUser($req)
+    function authUser()
     {
-        $auth = $req->auth;
-        if (!$auth)
-            throw new Exception("Auth Not Available");
-        if (is_array($auth))
-            return (object)$auth;
-        else
-            return json_decode($req->auth);
+        return auth()->user();
     }
 }
 /**

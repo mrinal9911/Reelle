@@ -53,14 +53,16 @@ Route::middleware('auth:sanctum')->group(function () {
  * | User Register & Login
  */
 Route::controller(UserController::class)->group(function () {
-    Route::post('login', 'login');
-    Route::post('register', 'userRegistration');
-    Route::post('forgot-password', 'forgotPassword'); //sendResetLinkEmail
-    Route::post('validate-password', 'validatePassword');
-    Route::post('reset-password', 'resetPassword')->middleware('auth:sanctum');
-    Route::post('logout', 'logout')->middleware('auth:sanctum');
+    Route::post('auth/register', 'userRegistration');           
+    Route::post('auth/login', 'login');
+    Route::get('user/profile', 'userDetails')->middleware('auth:sanctum');
+    Route::post('user/profile/update', 'updateUserProfile')->middleware('auth:sanctum');
+    Route::post('auth/forgot-password', 'forgotPassword'); //sendResetLinkEmail
+    Route::post('auth/validate-password', 'validatePassword');
+    Route::post('auth/reset-password', 'resetPassword')->middleware('auth:sanctum');
+    Route::post('auth/logout', 'logout')->middleware('auth:sanctum');
 
-    Route::get('reset-password/{token}',  'showResetPasswordForm')->name('reset.password.get');
-    Route::post('reset-password',  'submitResetPasswordForm')->name('reset.password.post');
+    Route::get('auth/reset-password/{token}',  'showResetPasswordForm')->name('reset.password.get');
+    Route::post('auth/reset-password',  'submitResetPasswordForm')->name('reset.password.post');
 });
 

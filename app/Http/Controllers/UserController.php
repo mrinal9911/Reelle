@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -16,6 +17,24 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+
+    /**
+     * | User Registration
+     */
+    public function userRegistration(StoreUserRequest $request)
+    {
+        try {
+            $request->validate(['id' => 'required']);
+            $mreqs = $this->makeUserRequest($request);
+            $mreqs = array_merge($mreqs, ['password' => Hash::make($request->password)]);
+            $mUser = new User();
+            $mUser->addUser($mreqs);
+            return responseMsg(true, "User Registered Successfully !! Please Continue to Login", "");
+        } catch (Exception $e) {
+            return responseMsg(false, $e->getMessage(), "");
+        }
+    }
+
     /**
      * | User Login
      */
@@ -55,13 +74,30 @@ class UserController extends Controller
     /**
      * | User Registration
      */
-    public function userRegistration(StoreUserRequest $request)
+    public function userDetails()
     {
         try {
-            $mreqs = $this->makeUserRequest($request);
+            $userId = auth()->user()->id;
             $mUser = new User();
-            $mUser->addUser($mreqs);
-            return responseMsg(true, "User Registered Successfully !! Please Continue to Login", "");
+            $userDtls = $mUser->getUserDetails($userId);
+            return responseMsg(true, "User Details", $userDtls);
+        } catch (Exception $e) {
+            return responseMsg(false, $e->getMessage(), "");
+        }
+    }
+
+    /**
+     * | Update User
+     */
+    public function updateUserProfile(UpdateUserRequest $request)
+    {
+        try {
+            $userId = auth()->user()->id;
+            $mreqs  = $this->makeUserRequest($request);
+            $mreqs  = array_merge($mreqs, ['id' => $userId]);
+            $mUser  = new User();
+            $mUser->editUser($mreqs);
+            return responseMsg(true, "User Updated Successfully", "");
         } catch (Exception $e) {
             return responseMsg(false, $e->getMessage(), "");
         }
@@ -205,7 +241,6 @@ class UserController extends Controller
             "phone"               => $request->phone,
             "dob"                 => $request->dob,
             "gender"              => $request->gender,
-            "password"            => Hash::make($request->password),
             "occupation"          => $request->occupation,
             "relationship_status" => $request->relationshipStatus,
             "primary_language"    => $request->primaryLanguage,
@@ -213,12 +248,12 @@ class UserController extends Controller
             "education_level"     => $request->educationLevel,
             "net_worth_range"     => $request->netWorthRange,
             "id_document_path"    => $request->idDocumentPath,
-            "govt_verified"       => $request->govtVerified ?? 0,
-            "two_fa_enabled"      => $request->twoFaEnabled ?? 0,
-            "device_logs"         => $request->deviceLogs,
-            "email_verified_at"   => $request->emailVerifiedAt,
-            "password"            => Hash::make($request->password),
-            "remember_token"      => $request->rememberToken,
+
+            // "govt_verified"       => $request->govtVerified ?? 0,
+            // "two_fa_enabled"      => $request->twoFaEnabled ?? 0,
+            // "device_logs"         => $request->deviceLogs,
+            // "email_verified_at"   => $request->emailVerifiedAt,
+            // "remember_token"      => $request->rememberToken,
         ];
     }
 }
