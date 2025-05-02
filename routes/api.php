@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UserSettingController;
 use Illuminate\Http\Request;
@@ -45,3 +46,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('user/settings', [UserSettingController::class, 'show']);
     Route::put('user/settings', [UserSettingController::class, 'update']);
 });
+
+/**
+ * | Created On: 02-05-2025
+ * | Created By: Mrinal Kumar
+ * | User Register & Login
+ */
+Route::controller(UserController::class)->group(function () {
+    Route::post('login', 'login');
+    Route::post('register', 'userRegistration');
+    Route::post('forgot-password', 'forgotPassword'); //sendResetLinkEmail
+    Route::post('validate-password', 'validatePassword');
+    Route::post('reset-password', 'resetPassword')->middleware('auth:sanctum');
+    Route::post('logout', 'logout')->middleware('auth:sanctum');
+
+    Route::get('reset-password/{token}',  'showResetPasswordForm')->name('reset.password.get');
+    Route::post('reset-password',  'submitResetPasswordForm')->name('reset.password.post');
+});
+
