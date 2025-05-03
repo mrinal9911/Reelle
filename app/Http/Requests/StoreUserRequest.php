@@ -25,8 +25,8 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'nickname'            => 'nullable|string|max:255',
-            'firstName'           => 'required|string|max:255',
-            'lastName'            => 'required|string|max:255',
+            // 'firstName'           => 'required|string|max:255',
+            // 'lastName'            => 'required|string|max:255',
             'email'               => 'required|email|max:255|unique:users,email',
             'phone'               => 'nullable|string|max:255',
             'dob'                 => 'nullable|date',
