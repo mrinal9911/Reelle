@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AssetsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UserSettingController;
@@ -53,7 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
  * | User Register & Login
  */
 Route::controller(UserController::class)->group(function () {
-    Route::post('auth/register', 'userRegistration');           
+    Route::post('auth/register', 'userRegistration');
     Route::post('auth/login', 'login');
     Route::get('user/profile', 'userDetails')->middleware('auth:sanctum');
     Route::post('user/profile/update', 'updateUserProfile')->middleware('auth:sanctum');
@@ -66,3 +67,15 @@ Route::controller(UserController::class)->group(function () {
     Route::post('auth/reset-password',  'submitResetPasswordForm')->name('reset.password.post');
 });
 
+Route::prefix('assets')->middleware('auth:sanctum')->group(function () {
+    Route::get('/', [AssetsController::class, 'index']);
+    Route::post('/', [AssetsController::class, 'store']);
+    Route::get('{asset}', [AssetsController::class, 'show']);
+    Route::put('{asset}', [AssetsController::class, 'update']);
+    Route::delete('{asset}', [AssetsController::class, 'destroy']);
+
+    // Extra actions
+    Route::post('{asset}/report-lost', [AssetsController::class, 'reportLost']);
+    Route::post('{asset}/toggle-sale', [AssetsController::class, 'toggleSale']);
+    Route::post('{asset}/toggle-visibility', [AssetsController::class, 'toggleVisibility']);
+});

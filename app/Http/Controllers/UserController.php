@@ -24,7 +24,7 @@ class UserController extends Controller
     public function userRegistration(StoreUserRequest $request)
     {
         try {
-            $request->validate(['id' => 'required']);
+            // $request->validate(['id' => 'required']);
             $mreqs = $this->makeUserRequest($request);
             $mreqs = array_merge($mreqs, ['password' => Hash::make($request->password)]);
             $mUser = new User();
