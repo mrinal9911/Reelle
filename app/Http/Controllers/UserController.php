@@ -175,7 +175,7 @@ class UserController extends Controller
     }
 
     /**
-     * | Reset Password
+     * | Reset Password for logged in user
      */
     public function resetPassword(Request $request)
     {
