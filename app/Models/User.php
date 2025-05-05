@@ -45,6 +45,11 @@ class User extends Authenticatable
         return $this->hasOne(UserSetting::class);
     }
 
+    public function assets()
+    {
+        return $this->hasMany(\App\Models\Asset::class);
+    }
+
     /**
      * | Add User Details
      */

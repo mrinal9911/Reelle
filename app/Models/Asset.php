@@ -10,8 +10,8 @@ class Asset extends Model
     use HasFactory;
     protected $fillable = [
         'user_id',
-        'category',
-        'subcategory',
+        'category_id',
+        'subcategory_id',
         'name',
         'serial_number',
         'description',
@@ -38,5 +38,14 @@ class Asset extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * | Edit Asset Details
+     */
+    public function editAsset($req)
+    {
+        $mAsset = Asset::findorfail($req['id']);
+        $mAsset->update($req);
     }
 }

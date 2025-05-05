@@ -67,15 +67,22 @@ Route::controller(UserController::class)->group(function () {
     Route::post('auth/reset-password',  'submitResetPasswordForm')->name('reset.password.post');
 });
 
-Route::prefix('assets')->middleware('auth:sanctum')->group(function () {
-    Route::get('/', [AssetsController::class, 'index']);
-    Route::post('/', [AssetsController::class, 'store']);
-    Route::get('{asset}', [AssetsController::class, 'show']);
-    Route::put('{asset}', [AssetsController::class, 'update']);
-    Route::delete('{asset}', [AssetsController::class, 'destroy']);
+/**
+ * | Created On: 05-05-2025
+ * | Created By: Mrinal Kumar
+ * | CRUD of Assets
+ */
+Route::controller(AssetsController::class)->middleware('auth:sanctum')->group(function () {
+    Route::get('asset/categories', 'assetCategoryList');
+    Route::post('asset/sub-categories', 'assetSubcategoryList');
+    Route::get('asset', 'assetList');
+    Route::post('asset/store', 'storeAsset');
+    Route::post('asset/details', 'getAssetDetailsById');
+    Route::post('asset/update', 'updateAsset');
+    Route::post('asset/delete', 'destroyAsset');
 
-    // Extra actions
-    Route::post('{asset}/report-lost', [AssetsController::class, 'reportLost']);
-    Route::post('{asset}/toggle-sale', [AssetsController::class, 'toggleSale']);
-    Route::post('{asset}/toggle-visibility', [AssetsController::class, 'toggleVisibility']);
+    // Extra actions which r not implemented
+    Route::post('{asset}/report-lost', 'reportLost');
+    Route::post('{asset}/toggle-sale', 'toggleSale');
+    Route::post('{asset}/toggle-visibility', 'toggleVisibility');
 });

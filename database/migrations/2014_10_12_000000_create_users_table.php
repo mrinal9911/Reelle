@@ -40,6 +40,7 @@ return new class extends Migration
             // Auth
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->boolean('status')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });

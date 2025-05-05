@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
         
             // Classification
-            $table->enum('category', ['lifestyle', 'vehicles', 'properties', 'art', 'documents', 'others']);
-            $table->string('subcategory')->nullable(); // e.g., clothes, bags, watches
+            $table->foreignId('category_id')->constrained('asset_categories');
+            $table->foreignId('subcategory_id')->nullable()->constrained('asset_subcategories');
         
             // Asset Details
             $table->string('name');
@@ -36,6 +36,7 @@ return new class extends Migration
             $table->boolean('is_reported_lost')->default(false);
             $table->boolean('is_listed_for_sale')->default(false);
             $table->boolean('is_visible')->default(true);
+            $table->boolean('status')->default(true);
         
             $table->timestamps();
         });

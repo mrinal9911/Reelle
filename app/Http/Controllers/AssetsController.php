@@ -3,75 +3,160 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
+use App\Models\AssetCategory;
+use App\Models\AssetSubcategory;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+use function PHPUnit\Framework\returnSelf;
+use function PHPUnit\Framework\throwException;
+
 class AssetsController extends Controller
 {
-    public function index()
+
+    /**
+     * | Asset Category List
+     */
+    public function assetCategoryList()
     {
-        $assets = Auth::user()->assets()->latest()->get();
-        return response()->json($assets);
+        try {
+            $mAssetCategory = new AssetCategory();
+            $assetCategory  = $mAssetCategory->listCategory();
+
+            return responseMsg(true, "Asset Category List", $assetCategory);
+        } catch (Exception $e) {
+            return responseMsg(false, $e->getMessage(), "");
+        }
     }
 
-    public function store(Request $request)
+    /**
+     * | Asset Sub Category List
+     */
+    public function assetSubcategoryList()
     {
-        $data = $request->validate([
-            'category' => 'required|in:lifestyle,vehicles,properties,art,documents,others',
-            'subcategory' => 'nullable|string',
-            'name' => 'required|string|max:255',
-            'serial_number' => 'nullable|string',
-            'description' => 'nullable|string',
-            'value' => 'nullable|numeric',
-            'verification_level' => 'in:none,basic,verified',
-            'attachments' => 'nullable|array',
-            'attachments.*' => 'nullable|string|url', // Assume frontend sends uploaded file URLs
-            'visibility' => 'in:private,friends,public',
-        ]);
+        try {
+            $mAssetSubcategory = new AssetSubcategory();
+            $assetSubcategory  = $mAssetSubcategory->listCategory();
 
-        $data['user_id'] = Auth::id();
-
-        $asset = Asset::create($data);
-
-        return response()->json($asset, 201);
+            return responseMsg(true, "Asset Sub Category List", $assetSubcategory);
+        } catch (Exception $e) {
+            return responseMsg(false, $e->getMessage(), "");
+        }
     }
 
-    public function show(Asset $asset)
+    /**
+     * | Asset List of Auth User
+     */
+    public function assetList()
     {
-        $this->authorizeAccess($asset);
-        return response()->json($asset);
+
+        $assets = Auth::user()->assets()->latest()->where('status', 1)->get();
+        return responseMsg(true, "Asset List", $assets);
     }
 
-    public function update(Request $request, Asset $asset)
+    /**
+     * | Storing Assets Data
+     */
+    public function storeAsset(Request $request)
     {
-        $this->authorizeAccess($asset);
+        try {
+            $data = $request->validate([
+                'category_id'        => 'required',
+                'subcategory_id'     => 'required',
+                'name'               => 'required|string|max:255',
+                'serial_number'      => 'nullable|string',
+                'description'        => 'nullable|string',
+                'value'              => 'nullable|numeric',
+                'verification_level' => 'in:none,basic,verified',
+                'attachments'        => 'nullable|array',
+                'attachments.*'      => 'nullable|string|url', // Assume frontend sends uploaded file URLs
+                'visibility'         => 'in:private,friends,public',
+            ]);
 
-        $data = $request->validate([
-            'subcategory' => 'nullable|string',
-            'name' => 'string|max:255',
-            'serial_number' => 'nullable|string',
-            'description' => 'nullable|string',
-            'value' => 'nullable|numeric',
-            'verification_level' => 'in:none,basic,verified',
-            'attachments' => 'nullable|array',
-            'attachments.*' => 'nullable|string|url',
-            'visibility' => 'in:private,friends,public',
-        ]);
+            $data['user_id'] = Auth::id();
+            $asset = Asset::create($data);
 
-        $asset->update($data);
-
-        return response()->json($asset);
+            return responseMsg(true, "Asset added succesfully", $asset);
+        } catch (Exception $e) {
+            return responseMsg(false, $e->getMessage(), "");
+        }
     }
 
-    public function destroy(Asset $asset)
+    /**
+     * | Asset Details via Id
+     */
+    public function getAssetDetailsById(Request $request)
     {
-        $this->authorizeAccess($asset);
-        $asset->delete();
-        return response()->json(['message' => 'Asset deleted']);
+        try {
+            $request->validate([
+                'id' => 'required'
+            ]);
+            $asset = Asset::with('user') // optionally eager load related user
+                ->where('id', $request->id)
+                ->where('user_id', Auth::id())
+                ->where('status', 1)
+                ->first();
+
+            if (!$asset)
+                throw new Exception("Asset not found");
+
+            return responseMsg(true, "Asset Found", $asset);
+        } catch (Exception $e) {
+            return responseMsg(false, $e->getMessage(), "");
+        }
     }
 
+    /**
+     * | Update Asset Details
+     */
+    public function updateAsset(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'subcategory_id'     => 'nullable',
+                'name'               => 'string|max:255',
+                'serial_number'      => 'nullable|string',
+                'description'        => 'nullable|string',
+                'value'              => 'nullable|numeric',
+                'verification_level' => 'in:none,basic,verified',
+                'attachments'        => 'nullable|array',
+                'attachments.*'      => 'nullable|string|url',
+                'visibility'         => 'in:private,friends,public',
+                'id'                 => 'required'
+            ]);
+            $mAsset = new Asset();
+            $mAsset->editAsset($data);
+
+            return responseMsg(true, "Asset details updated succesfully", "");
+        } catch (Exception $e) {
+            return responseMsg(false, $e->getMessage(), "");
+        }
+    }
+
+    /**
+     * | Delete Asset Details
+     */
+    public function destroyAsset(Request $request)
+    {
+        try {
+            $request->validate([
+                'id' => 'required'
+            ]);
+            $mAsset = new Asset();
+            $mAsset->where('id', $request->id)->update(['status' => '0']);
+            return responseMsg(true, "Asset Deleted Succesfully", "");
+        } catch (Exception $e) {
+            return responseMsg(false, $e->getMessage(), "");
+        }
+    }
+
+
+
+    /**
+         Not Implemented for now
+     */
     // === Extra Actions ===
-
     public function reportLost(Asset $asset)
     {
         $this->authorizeAccess($asset);
@@ -93,9 +178,9 @@ class AssetsController extends Controller
         return response()->json(['visible' => $asset->is_visible]);
     }
 
-    private function authorizeAccess(Asset $asset)
+    private function authorizeAccess($userId)
     {
-        if ($asset->user_id !== Auth::id()) {
+        if ($userId != Auth::id()) {
             abort(403, 'Unauthorized access');
         }
     }
