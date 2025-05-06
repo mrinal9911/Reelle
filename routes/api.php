@@ -54,16 +54,18 @@ Route::middleware('auth:sanctum')->group(function () {
  * | User Register & Login
  */
 Route::controller(UserController::class)->group(function () {
-    Route::post('auth/register', 'userRegistration');
-    Route::post('auth/login', 'login');
+    Route::post('auth/register', 'userRegistration')->name('register');
+    Route::post('auth/login', 'login')->name('login');
     Route::get('user/profile', 'userDetails')->middleware('auth:sanctum');
     Route::post('user/profile/update', 'updateUserProfile')->middleware('auth:sanctum');
     Route::post('auth/forgot-password', 'forgotPassword'); //sendResetLinkEmail
+
+    Route::get('reset-password/{token}', 'showResetPasswordForm')->name('reset.password.get');
+
     Route::post('auth/validate-password', 'validatePassword');
     Route::post('auth/reset-password', 'resetPassword')->middleware('auth:sanctum');
     Route::post('auth/logout', 'logout')->middleware('auth:sanctum');
 
-    Route::get('auth/reset-password/{token}',  'showResetPasswordForm')->name('reset.password.get');
     Route::post('auth/reset-password',  'submitResetPasswordForm')->name('reset.password.post');
 });
 

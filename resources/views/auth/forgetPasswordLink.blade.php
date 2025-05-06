@@ -1,7 +1,5 @@
 @extends('layout')
 
-
-
 @section('content')
 
 <main class="login-form">
