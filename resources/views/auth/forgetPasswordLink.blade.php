@@ -18,7 +18,7 @@
 
 
 
-                        <form action="{{ route('reset.password.post') }}" method="POST">
+                        <form action="{{ route('submit.forgotpassword.post') }}" method="POST">
 
                             @csrf
 

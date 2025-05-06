@@ -144,34 +144,39 @@ class UserController extends Controller
     }
 
     /**
+     * | submitResetPasswordForm
      * | Validate Password
      */
-    public function validatePassword(Request $request)
+    public function submitForgetPasswordForm(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'token' => 'required',
-            'email' => 'required|email|exists:users,email',
-            'password' => 'required|min:8|confirmed',
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'token' => 'required',
+                'email' => 'required|email|exists:users,email',
+                'password' => 'required|min:8|confirmed',
+            ]);
 
-        if ($validator->fails()) {
-            return validationError($validator);
-        }
-
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password),
-                ])->save();
+            if ($validator->fails()) {
+                return validationError($validator);
             }
-        );
 
-        if ($status === Password::PASSWORD_RESET) {
-            return response()->json(['message' => __($status)], 200);
+            $updatePassword = DB::table('password_reset_tokens')
+                ->where([
+                    'email' => $request->email,
+                    'token' => $request->token
+                ])->first();
+
+            if (!$updatePassword)
+                return back()->withInput()->with('error', 'Invalid token!');
+
+            $user = User::where('email', $request->email)
+                ->update(['password' => Hash::make($request->password)]);
+            DB::table('password_reset_tokens')->where(['email' => $request->email])->delete();
+
+            return responseMsg(true, "Your password has been changed succesfully", "");
+        } catch (Exception $e) {
+            return responseMsg(false, $e->getMessage(), "");
         }
-
-        return response()->json(['message' => __($status)], 400);
     }
 
     /**
