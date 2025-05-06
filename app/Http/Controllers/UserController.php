@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
+use App\Models\UserLocation;
 use Carbon\Carbon;
 use Exception;
+use GuzzleHttp\RetryMiddleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -173,10 +176,19 @@ class UserController extends Controller
                 ->update(['password' => Hash::make($request->password)]);
             DB::table('password_reset_tokens')->where(['email' => $request->email])->delete();
 
+            return redirect('/api/password-changed')->with('message', 'Your password has been changed!');
             return responseMsg(true, "Your password has been changed succesfully", "");
         } catch (Exception $e) {
             return responseMsg(false, $e->getMessage(), "");
         }
+    }
+
+    /**
+     * | Password Change Page
+     */
+    public function passwordChangedPage()
+    {
+        return view('passwordChanged');
     }
 
     /**
@@ -260,5 +272,74 @@ class UserController extends Controller
             // "email_verified_at"   => $request->emailVerifiedAt,
             // "remember_token"      => $request->rememberToken,
         ];
+    }
+
+    /**
+     * | Update User Location
+     */
+    public function updateLocation(Request $request)
+    {
+        try {
+            $request->validate([
+                'latitude'  => 'required|numeric',
+                'longitude' => 'required|numeric',
+                'heading'   => 'nullable|numeric',
+            ]);
+
+            $location = Auth::user()->location()->updateOrCreate(
+                ['user_id' => Auth::id()],
+                [
+                    'latitude'  => $request->latitude,
+                    'longitude' => $request->longitude,
+                    'heading'   => $request->heading,
+                ]
+            );
+
+            return responseMsg(true, 'Location updated', $location);
+        } catch (Exception $e) {
+            return responseMsg(false, $e->getMessage(), "");
+        }
+    }
+
+    /**
+     * | Get Near by User
+     */
+    public function getNearbyUsers(Request $request)
+    {
+        try {
+            $request->validate([
+                'latitude' => 'required|numeric',
+                'longitude' => 'required|numeric',
+                'radius' => 'required|numeric', // in kilometers
+            ]);
+
+            $lat = $request->latitude;
+            $lng = $request->longitude;
+            $radius = $request->radius;
+
+            $users = UserLocation::selectRaw("
+            user_id,
+            latitude,
+            longitude,
+            heading,
+            (
+                6371 * acos(
+                    cos(radians(?)) *
+                    cos(radians(latitude)) *
+                    cos(radians(longitude) - radians(?)) +
+                    sin(radians(?)) *
+                    sin(radians(latitude))
+                )
+            ) AS distance
+        ", [$lat, $lng, $lat])
+                ->having('distance', '<=', $radius)
+                ->with('user')
+                ->orderBy('distance')
+                ->get();
+
+            return responseMsg(true, 'Nearby users', $users);
+        } catch (Exception $e) {
+            return responseMsg(false, $e->getMessage(), "");
+        }
     }
 }

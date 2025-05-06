@@ -85,4 +85,9 @@ class User extends Authenticatable
         $mUser = User::findorfail($req['id']);
         $mUser->update($req);
     }
+
+    public function location()
+    {
+        return $this->hasOne(UserLocation::class);
+    }
 }
