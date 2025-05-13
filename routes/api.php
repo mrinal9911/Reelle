@@ -58,6 +58,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('auth/login', 'login')->name('login');
     Route::get('user/profile', 'userDetails')->middleware('auth:sanctum');
     Route::post('user/profile/update', 'updateUserProfile')->middleware('auth:sanctum');
+    Route::post('user/profile/photo', 'storePhoto')->middleware('auth:sanctum');
     Route::post('auth/forgot-password', 'forgotPassword'); //sendResetLinkEmail
     Route::get('reset-password/{token}', 'showResetPasswordForm')->name('reset.password.get');
     Route::post('auth/validate-password', 'submitForgetPasswordForm')->name('submit.forgotpassword.post');

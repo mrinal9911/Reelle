@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('first_name')->nullable();
             $table->string('last_name'); // Required for Level 2 verification
             $table->string('email')->unique();
-            $table->string('phone')->nullable();
+            $table->string('phone')->unique();
             $table->date('dob')->nullable();
             $table->enum('gender', ['male', 'female', 'other'])->nullable();
             $table->string('occupation')->nullable();

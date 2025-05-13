@@ -107,6 +107,29 @@ class UserController extends Controller
     }
 
     /**
+     * | Upload Photo
+     */
+    public function storePhoto(Request $request)
+    {
+        try {
+            $request->validate([
+                'photo' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            ]);
+
+            $mUser  = new User();
+            $userId = auth()->user()->id;
+            // Store the image in public storage
+            $path = $request->file('photo')->store('photos', 'public');
+            $mUser->where('id', $userId)->update(['id_document_path' => ('storage/' . $path)]);
+
+            return responseMsg(true, "Photo uploaded successfully.", "");
+        } catch (Exception $e) {
+            return responseMsg(false, $e->getMessage(), "");
+        }
+    }
+
+
+    /**
      * | Forgot Password
      */
     public function forgotPassword(Request $request)
