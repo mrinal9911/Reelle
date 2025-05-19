@@ -33,7 +33,7 @@ class AssetsController extends Controller
     /**
      * | Asset Sub Category List
      */
-    public function assetSubcategoryList()
+    public function assetSubcategoryList(Request $request)
     {
         try {
             $mAssetSubcategory = new AssetSubcategory();
