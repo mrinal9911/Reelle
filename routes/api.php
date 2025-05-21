@@ -67,7 +67,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('auth/logout', 'logout')->middleware('auth:sanctum');
 
     Route::post('map/user/location', 'updateLocation')->middleware('auth:sanctum');
-    Route::get('map/user/nearby', 'getNearbyUsers')->middleware('auth:sanctum');
+    Route::get('map/user/nearby', 'getNearbyUsers');
 });
 
 /**
